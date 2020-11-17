@@ -15,6 +15,7 @@ class Block(pygame.sprite.Sprite):
 
 def generate(id_generate):
     bl = Block((200, 100), (300, 500), 0)
+
     group = pygame.sprite.Group()
     group.add(bl)
     return group
