@@ -56,32 +56,34 @@ def run_game():
         clock.tick(st.frames_per_second)
 
 
+# метод отрисовки всего (есои чтото нужно орисовать кидаем это сюда)
+def draw(screen, bg, active_sprite_list, level, block_map):
+    # отрисовка заднего фона
+    screen.blit(bg[level], (0, 0))
+    block_map.update()
+    block_map.draw(level, screen)
+    # обновление позиции персонажа
+    active_sprite_list.update()
+    active_sprite_list.draw(screen)
+    # обновление экрана
+    pygame.display.update()
+
+
 # метод движение персонажа
 def move_player(player, level_maps, level_id):
     # останавливаем движение, если кнопки движения нажаты продолжает двигаться
     player.stop()
-    permission_move = collision(player, level_maps, level_id)
     # нажатые кнопки
     keys = pygame.key.get_pressed()
     # движение
-    if not permission_move[0]:
-        if keys[pygame.K_UP]:
-            move_up(player)
-        if keys[pygame.K_DOWN]:
-            move_down(player)
-        if keys[pygame.K_LEFT]:
-            move_left(player)
-        if keys[pygame.K_RIGHT]:
-            move_right(player)
-    else:
-        if keys[pygame.K_UP] and permission_move[1]:
-            move_up(player)
-        if keys[pygame.K_DOWN] and permission_move[2]:
-            move_down(player)
-        if keys[pygame.K_LEFT] and permission_move[3]:
-            move_left(player)
-        if keys[pygame.K_RIGHT] and permission_move[4]:
-            move_right(player)
+    if keys[pygame.K_UP]:
+        move_up(player)
+    if keys[pygame.K_DOWN]:
+        move_down(player)
+    if keys[pygame.K_LEFT]:
+        move_left(player)
+    if keys[pygame.K_RIGHT]:
+        move_right(player)
 
 
 # метод движение ботов
@@ -155,43 +157,6 @@ def move_right(pl_bt):
 
 
 def collision(pl_bt, level_maps, level_id):
-    # Следим ударяем ли мы какой-то другой объект
-    sprite_list = level_maps[level_id]
-    # Перебираем все возможные объекты, с которыми можем столкнуться
-    for sprite in sprite_list:
-        if pl_bt.rect.right > sprite.rect.left and pl_bt.rect.left < sprite.rect.right and \
-                pl_bt.rect.top < sprite.rect.bottom and pl_bt.rect.bottom > sprite.rect.top:
-            col = True
-        else:
-            col = False
-        if sprite.rect.bottom-20 < pl_bt.rect.top < sprite.rect.bottom:
-            top = False
-        else:
-            top = True
-        if sprite.rect.top+20 > pl_bt.rect.bottom > sprite.rect.top:
-            bottom = False
-        else:
-            bottom = True
-        if sprite.rect.right-20 < pl_bt.rect.left < sprite.rect.right:
-            left = False
-        else:
-            left = True
-        if sprite.rect.left+20 > pl_bt.rect.right > sprite.rect.left:
-            right = False
-        else:
-            right = True
-
-        return [col, top, bottom, left, right]
+    pass
 
 
-# метод отрисовки всего (есои чтото нужно орисовать кидаем это сюда)
-def draw(screen, bg, active_sprite_list, level, block_map):
-    # отрисовка заднего фона
-    screen.blit(bg[level], (0, 0))
-    block_map.update()
-    block_map.draw(level, screen)
-    # обновление позиции персонажа
-    active_sprite_list.update()
-    active_sprite_list.draw(screen)
-    # обновление экрана
-    pygame.display.update()
