@@ -72,6 +72,7 @@ def draw(screen, bg, active_sprite_list, level, block_map):
 # метод движение персонажа
 def move_player(player, level_maps, level_id):
     # останавливаем движение, если кнопки движения нажаты продолжает двигаться
+    player.lvl = level_maps[level_id]
     player.stop()
     # нажатые кнопки
     keys = pygame.key.get_pressed()
