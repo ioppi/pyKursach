@@ -1,5 +1,7 @@
 import pygame
+import random
 import player_class
+import bots_class
 from level_manage import Levels
 import setting_class
 import sys
@@ -15,7 +17,16 @@ st = setting_class.Setting()
 def run_game():
     # создание игрока
     player = player_class.Player(st.skin, st.speed)
+    # начальное расположение игрока
+    spawn(player)
+
     levels_map = Levels()
+    bots = []
+    for i in range(5):
+        b = bots_class.Bot(st.speed-1)
+        spawn(b)
+        bots.append(b)
+    print(bots)
     # инициализация и размер экрана
     screen = pygame.display.set_mode(st.size_screen)
     # название окна (игры)
@@ -28,19 +39,21 @@ def run_game():
         bg[i] = pygame.transform.scale(bg[i], st.size_screen)
     # Используется для управления скоростью обновления экрана(кадры в секунду)
     clock = pygame.time.Clock()
-    # отрисовка спрайтов
-    active_sprite_list = pygame.sprite.Group()
-    # начальное расположение игрока
-    player.rect.x = 250
-    player.rect.y = 250
-    active_sprite_list.add(player)
-
+    # для отрисовки спрайтов
+    pl_sprite_list = pygame.sprite.Group()
+    pl_sprite_list.add(player)
+    bt_sprite_list = pygame.sprite.Group()
+    for b in bots:
+        bt_sprite_list.add(b)
+    print(bt_sprite_list)
     # уровень на котором мы сейчас находимся (важная переменнаяб бот должен иметь такой параметр)
     # player.level_player
 
     # остновной цикл
     run = True
+    n_tick = 0
     while run:
+        n_tick += 1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -49,22 +62,29 @@ def run_game():
                 if event.key == K_ESCAPE:
                     run = False
         # метод движения игрока + скролинг заднего фона и препятствий в будующем
-        move_player(player, levels_map.block_map, player.level_player)
+        move_player(player, levels_map.block_map, player.level)
         # отрисовка всего и вся
-        draw(screen, bg, active_sprite_list, player.level_player, levels_map)
+        draw(screen, bg, pl_sprite_list, bt_sprite_list, player.level, levels_map)
         # кадры в секунду
         clock.tick(st.frames_per_second)
 
 
 # метод отрисовки всего (есои чтото нужно орисовать кидаем это сюда)
-def draw(screen, bg, active_sprite_list, level, block_map):
+def draw(screen, bg, pl, bt, level, block_map):
     # отрисовка заднего фона
     screen.blit(bg[level], (0, 0))
+    active_bt = pygame.sprite.Group()
+    for i in bt:
+        i.update()
+        if i.level == level:
+            active_bt.add(i)
+    active_bt.draw(screen)
+
     block_map.update()
     block_map.draw(level, screen)
     # обновление позиции персонажа
-    active_sprite_list.update()
-    active_sprite_list.draw(screen)
+    pl.update()
+    pl.draw(screen)
     # обновление экрана
     pygame.display.update()
 
@@ -77,87 +97,105 @@ def move_player(player, level_maps, level_id):
     # нажатые кнопки
     keys = pygame.key.get_pressed()
     # движение
-    if keys[pygame.K_UP]:
-        move_up(player)
-    if keys[pygame.K_DOWN]:
-        move_down(player)
-    if keys[pygame.K_LEFT]:
-        move_left(player)
-    if keys[pygame.K_RIGHT]:
-        move_right(player)
+    if keys[pygame.K_UP] or keys[pygame.K_DOWN]:
+        if keys[pygame.K_UP]:
+            move_up(player)
+        if keys[pygame.K_DOWN]:
+            move_down(player)
+        if keys[pygame.K_UP] and keys[pygame.K_DOWN]:
+            player.change_y = 0
+    if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
+        if keys[pygame.K_LEFT]:
+            move_left(player)
+        if keys[pygame.K_RIGHT]:
+            move_right(player)
+        if keys[pygame.K_LEFT] and keys[pygame.K_RIGHT]:
+            player.change_x = 0
 
 
 # метод движение ботов
-def move_bot(bot, key):  # 0-up/1-down/2-left/3-right
+def move_bot(bot, key):  # 0-up/2-right/3-down/4-left/
     bot.stop()
     if key == 0:
         move_up(bot)
     if key == 1:
-        move_down(bot)
-    if key == 2:
-        move_left(bot)
-    if key == 3:
         move_right(bot)
+    if key == 2:
+        move_down(bot)
+    if key == 3:
+        move_left(bot)
 
 
 # вспомогательные методы для двмжения бота и игрока
 # вверх
 def move_up(pl_bt):
-    if (pl_bt.level_player == 0 or pl_bt.level_player == 1) and pl_bt.rect.y >= 2:
+    if (pl_bt.level == 0 or pl_bt.level == 1) and pl_bt.rect.y >= 2:
         pl_bt.go_up()
-    elif pl_bt.level_player == 2 or pl_bt.level_player == 3:
+    elif pl_bt.level == 2 or pl_bt.level == 3:
         if pl_bt.rect.y <= -10:
             pl_bt.rect.y = st.height - 80
-            if pl_bt.level_player == 2:
-                pl_bt.level_player = 0
-            elif pl_bt.level_player == 3:
-                pl_bt.level_player = 1
+            if pl_bt.level == 2:
+                pl_bt.level = 0
+            elif pl_bt.level == 3:
+                pl_bt.level = 1
         pl_bt.go_up()
 
 
 # вниз
 def move_down(pl_bt):
-    if (pl_bt.level_player == 2 or pl_bt.level_player == 3) and pl_bt.rect.y <= st.height - 100:
+    if (pl_bt.level == 2 or pl_bt.level == 3) and pl_bt.rect.y <= st.height - 60:
         pl_bt.go_down()
-    elif pl_bt.level_player == 0 or pl_bt.level_player == 1:
-        if pl_bt.rect.y >= st.height - 90:
+    elif pl_bt.level == 0 or pl_bt.level == 1:
+        if pl_bt.rect.y >= st.height - 30:
             pl_bt.rect.y = -5
-            if pl_bt.level_player == 0:
-                pl_bt.level_player = 2
-            elif pl_bt.level_player == 1:
-                pl_bt.level_player = 3
+            if pl_bt.level == 0:
+                pl_bt.level = 2
+            elif pl_bt.level == 1:
+                pl_bt.level = 3
         pl_bt.go_down()
 
 
 # влево
 def move_left(pl_bt):
-    if (pl_bt.level_player == 0 or pl_bt.level_player == 2) and pl_bt.rect.x >= 2:
+    if (pl_bt.level == 0 or pl_bt.level == 2) and pl_bt.rect.x >= 2:
         pl_bt.go_left()
-    elif pl_bt.level_player == 1 or pl_bt.level_player == 3:
+    elif pl_bt.level == 1 or pl_bt.level == 3:
         if pl_bt.rect.x <= -10:
             pl_bt.rect.x = st.width - 70
-            if pl_bt.level_player == 1:
-                pl_bt.level_player = 0
-            elif pl_bt.level_player == 3:
-                pl_bt.level_player = 2
+            if pl_bt.level == 1:
+                pl_bt.level = 0
+            elif pl_bt.level == 3:
+                pl_bt.level = 2
         pl_bt.go_left()
 
 
 # вправо
 def move_right(pl_bt):
-    if (pl_bt.level_player == 1 or pl_bt.level_player == 3) and pl_bt.rect.x <= st.width - 80:
+    if (pl_bt.level == 1 or pl_bt.level == 3) and pl_bt.rect.x <= st.width - 60:
         pl_bt.go_right()
-    elif pl_bt.level_player == 0 or pl_bt.level_player == 2:
-        if pl_bt.rect.x >= st.width - 70:
+    elif pl_bt.level == 0 or pl_bt.level == 2:
+        if pl_bt.rect.x >= st.width - 30:
             pl_bt.rect.x = -10
-            if pl_bt.level_player == 0:
-                pl_bt.level_player = 1
-            elif pl_bt.level_player == 2:
-                pl_bt.level_player = 3
+            if pl_bt.level == 0:
+                pl_bt.level = 1
+            elif pl_bt.level == 2:
+                pl_bt.level = 3
         pl_bt.go_right()
 
 
-def collision(pl_bt, level_maps, level_id):
-    pass
+def spawn(pl_bt):
+    if random.choice([True, False]):
+        x = random.randint(0, st.width-50)
+        if random.choice([True, False]):
+            y = random.randint(0, (st.block_size-51))
+        else:
+            y = random.randint((st.height-st.block_size), st.height-51)
+    else:
+        y = random.randint(0, st.height - 51)
+        if random.choice([True, False]):
+            x = random.randint(0, (st.block_size - 51))
+        else:
+            x = random.randint((st.width - st.block_size), st.width - 51)
 
-
+    pl_bt.rect.x = x
+    pl_bt.rect.y = y

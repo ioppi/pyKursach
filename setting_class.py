@@ -12,9 +12,11 @@ class Setting:
         self.size_screen = [self.width,  self.height]
         self.frames_per_second = 30
         self.sound_volume = 0
+        self.block_size = 120
 
     def download_setting(self):
         pass
 
     def save_setting(self):
         pass
+

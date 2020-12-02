@@ -8,24 +8,27 @@ class Support:
 
     # все перемещения игрока
     def go_up(self):
-        if self.collision():
+        coll = self.collision()
+        if coll[0] or coll[1]:
             self.change_y = -self.speed  # Двигаем игрока по y в верх
 
     def go_down(self):
-        if self.collision():
+        coll = self.collision()
+        if coll[0] or coll[3]:
             self.change_y = self.speed  # Двигаем игрока по y в низ
 
     def go_left(self):
-        if self.collision():
+        coll = self.collision()
+        if coll[0] or coll[4]:
             self.change_x = -self.speed  # Двигаем игрока по Х
-
         if self.right:  # Проверяем куда он смотрит и если что, то переворачиваем его
             self.flip()
             self.right = False
 
     def go_right(self):
         # то же самое, но вправо
-        if self.collision()[0]:
+        coll = self.collision()
+        if coll[0] or coll[2]:
             self.change_x = self.speed
         if not self.right:
             self.flip()
@@ -33,9 +36,20 @@ class Support:
 
     def collision(self):
         moving = [True, True, True, True, True]
+        a = 20
+
         for block in self.lvl:
             if pygame.sprite.collide_rect(self, block):
                 moving[0] = False
+            if block.rect.bottom-a < self.rect.top <= block.rect.bottom:
+                moving[1] = False
+            if block.rect.left+a > self.rect.right >= block.rect.left:
+                moving[2] = False
+            if block.rect.top+a > self.rect.bottom >= block.rect.top:
+                moving[3] = False
+            if block.rect.right-a < self.rect.left <= block.rect.right:
+                moving[4] = False
+        # print(moving)
         return moving
 
     def stop(self):
@@ -46,4 +60,3 @@ class Support:
     def flip(self):
         # переворот игрока (зеркальное отражение)
         self.image = pygame.transform.flip(self.image, True, False)
-

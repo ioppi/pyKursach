@@ -17,7 +17,7 @@ class Block(pygame.sprite.Sprite):
 def generate():
     st = setting_class.Setting()
     group = pygame.sprite.Group()
-    block_size = 120
+    block_size = st.block_size
     grid_blocks = [st.width//block_size, st.height//block_size]
     for i in range(50):
         bl = Block((block_size,  block_size))

@@ -13,11 +13,11 @@ class Player(pygame.sprite.Sprite, Support):
         super().__init__()
 
         # картинка игрока
-        self.image = pygame.image.load(img_player_path)
+        self.image = pygame.transform.scale(pygame.image.load(img_player_path), (50, 50))
         # Установите ссылку на изображение прямоугольника
         self.rect = self.image.get_rect()
         #  уровень на котором находится игрок
-        self.level_player = random.randint(0, 3)
+        self.level = random.randint(0, 3)
         # вектор перемещения (для отслеживания столкновений) на будующее
         self.change_x = 0
         self.change_y = 0
