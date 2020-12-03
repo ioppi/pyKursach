@@ -80,6 +80,10 @@ def run_game():
         else:
             game_time = 0
             remaining_time = 0
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        run = False
 
 
 # метод отрисовки всего (есои чтото нужно орисовать кидаем это сюда)

@@ -18,12 +18,46 @@ def generate():
     st = setting_class.Setting()
     group = pygame.sprite.Group()
     block_size = st.block_size
-    grid_blocks = [st.width//block_size, st.height//block_size]
-    for i in range(50):
-        bl = Block((block_size,  block_size))
-        bl.rect.x = random.randrange(1, grid_blocks[0]-1)*block_size
-        bl.rect.y = random.randrange(1, grid_blocks[1]-1)*block_size
-        group.add(bl)
+    grid_blocks = [st.width // block_size, st.height // block_size]
+    # делаем сетку и по сетку проверяем правила
+    grid = []
+    for k in range(0, grid_blocks[1]):
+        s = []
+        for r in range(0, grid_blocks[0]):
+            s.append(False)
+        grid.append(s)
+    i = st.block_value
+    while i > 0:
+        bl = Block((block_size, block_size))
+        x = random.randrange(1, grid_blocks[0] - 1)
+        y = random.randrange(1, grid_blocks[1] - 1)
+        if not grid[y][x] and \
+                (
+                        not (grid[y][x + 1] and grid[y + 1][x] and grid[y + 1][x + 1]) and
+                        not (grid[y][x - 1] and grid[y - 1][x] and grid[y - 1][x - 1]) and
+                        not (grid[y][x + 1] and grid[y - 1][x] and grid[y - 1][x + 1]) and
+                        not (grid[y][x - 1] and grid[y + 1][x] and grid[y + 1][x - 1])
+                ):
+
+            if (2 < x < grid_blocks[0] - 2) and (2 < y < grid_blocks[1] - 2):
+                if (
+                        (not (grid[y][x + 2] and grid[y + 1][x + 1] and grid[y - 1][x + 1])) and
+                        (not (grid[y][x - 2] and grid[y + 1][x - 1] and grid[y - 1][x - 1])) and
+                        (not (grid[y + 2][x] and grid[y + 1][x + 1] and grid[y + 1][x - 1])) and
+                        (not (grid[y - 2][x] and grid[y - 1][x + 1] and grid[y - 1][x - 1]))
+                ):
+                    bl.rect.x = x * block_size
+                    bl.rect.y = y * block_size
+                    group.add(bl)
+                    grid[y][x] = True
+                    i -= 1
+            else:
+                bl.rect.x = x * block_size
+                bl.rect.y = y * block_size
+                group.add(bl)
+                grid[y][x] = True
+                i -= 1
+
     return group
 
 
