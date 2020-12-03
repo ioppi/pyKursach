@@ -37,8 +37,7 @@ def run_game():
     #  заднего фона под экран
     for i in range(4):
         bg[i] = pygame.transform.scale(bg[i], st.size_screen)
-    # Используется для управления скоростью обновления экрана(кадры в секунду)
-    clock = pygame.time.Clock()
+
     # для отрисовки спрайтов
     pl_sprite_list = pygame.sprite.Group()
     pl_sprite_list.add(player)
@@ -48,25 +47,39 @@ def run_game():
     print(bt_sprite_list)
     # уровень на котором мы сейчас находимся (важная переменнаяб бот должен иметь такой параметр)
     # player.level_player
+    # Используется для управления скоростью обновления экрана(кадры в секунду)
+    clock = pygame.time.Clock()
 
+    n_tick = 0
+    game_time = 0
+    remaining_time = st.time
     # остновной цикл
     run = True
-    n_tick = 0
+
     while run:
         n_tick += 1
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    run = False
-        # метод движения игрока + скролинг заднего фона и препятствий в будующем
-        move_player(player, levels_map.block_map, player.level)
-        # отрисовка всего и вся
-        draw(screen, bg, pl_sprite_list, bt_sprite_list, player.level, levels_map)
-        # кадры в секунду
-        clock.tick(st.frames_per_second)
+        if n_tick % 30 == 0:
+            print(remaining_time - game_time-1)
+            game_time += 1
+        if remaining_time-game_time > 0:
+            # кадры в секунду
+            clock.tick(st.frames_per_second)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        run = False
+            # метод движения игрока
+            move_player(player, levels_map.block_map)
+            for i in bots:
+                move_bot(i, levels_map.block_map)
+            # отрисовка всего и вся
+            draw(screen, bg, pl_sprite_list, bt_sprite_list, player.level_id, levels_map)
+        else:
+            game_time = 0
+            remaining_time = 0
 
 
 # метод отрисовки всего (есои чтото нужно орисовать кидаем это сюда)
@@ -76,7 +89,7 @@ def draw(screen, bg, pl, bt, level, block_map):
     active_bt = pygame.sprite.Group()
     for i in bt:
         i.update()
-        if i.level == level:
+        if i.level_id == level:
             active_bt.add(i)
     active_bt.draw(screen)
 
@@ -90,9 +103,9 @@ def draw(screen, bg, pl, bt, level, block_map):
 
 
 # метод движение персонажа
-def move_player(player, level_maps, level_id):
+def move_player(player, level_maps):
     # останавливаем движение, если кнопки движения нажаты продолжает двигаться
-    player.lvl = level_maps[level_id]
+    player.lvl = level_maps[player.level_id]
     player.stop()
     # нажатые кнопки
     keys = pygame.key.get_pressed()
@@ -114,72 +127,76 @@ def move_player(player, level_maps, level_id):
 
 
 # метод движение ботов
-def move_bot(bot, key):  # 0-up/2-right/3-down/4-left/
+def move_bot(bot, level_maps):  # 0-up/1-right/2-down/3-left/
     bot.stop()
-    if key == 0:
+    bot.lvl = level_maps[bot.level_id]
+    mv = bot.get_move()
+
+    if mv[0] == 0:
         move_up(bot)
-    if key == 1:
-        move_right(bot)
-    if key == 2:
+    if mv[0] == 2:
         move_down(bot)
-    if key == 3:
+
+    if mv[1] == 1:
+        move_right(bot)
+    if mv[1] == 3:
         move_left(bot)
 
 
 # вспомогательные методы для двмжения бота и игрока
 # вверх
 def move_up(pl_bt):
-    if (pl_bt.level == 0 or pl_bt.level == 1) and pl_bt.rect.y >= 2:
+    if (pl_bt.level_id == 0 or pl_bt.level_id == 1) and pl_bt.rect.y >= 2:
         pl_bt.go_up()
-    elif pl_bt.level == 2 or pl_bt.level == 3:
+    elif pl_bt.level_id == 2 or pl_bt.level_id == 3:
         if pl_bt.rect.y <= -10:
             pl_bt.rect.y = st.height - 80
-            if pl_bt.level == 2:
-                pl_bt.level = 0
-            elif pl_bt.level == 3:
-                pl_bt.level = 1
+            if pl_bt.level_id == 2:
+                pl_bt.level_id = 0
+            elif pl_bt.level_id == 3:
+                pl_bt.level_id = 1
         pl_bt.go_up()
 
 
 # вниз
 def move_down(pl_bt):
-    if (pl_bt.level == 2 or pl_bt.level == 3) and pl_bt.rect.y <= st.height - 60:
+    if (pl_bt.level_id == 2 or pl_bt.level_id == 3) and pl_bt.rect.y <= st.height - 60:
         pl_bt.go_down()
-    elif pl_bt.level == 0 or pl_bt.level == 1:
+    elif pl_bt.level_id == 0 or pl_bt.level_id == 1:
         if pl_bt.rect.y >= st.height - 30:
             pl_bt.rect.y = -5
-            if pl_bt.level == 0:
-                pl_bt.level = 2
-            elif pl_bt.level == 1:
-                pl_bt.level = 3
+            if pl_bt.level_id == 0:
+                pl_bt.level_id = 2
+            elif pl_bt.level_id == 1:
+                pl_bt.level_id = 3
         pl_bt.go_down()
 
 
 # влево
 def move_left(pl_bt):
-    if (pl_bt.level == 0 or pl_bt.level == 2) and pl_bt.rect.x >= 2:
+    if (pl_bt.level_id == 0 or pl_bt.level_id == 2) and pl_bt.rect.x >= 2:
         pl_bt.go_left()
-    elif pl_bt.level == 1 or pl_bt.level == 3:
+    elif pl_bt.level_id == 1 or pl_bt.level_id == 3:
         if pl_bt.rect.x <= -10:
             pl_bt.rect.x = st.width - 70
-            if pl_bt.level == 1:
-                pl_bt.level = 0
-            elif pl_bt.level == 3:
-                pl_bt.level = 2
+            if pl_bt.level_id == 1:
+                pl_bt.level_id = 0
+            elif pl_bt.level_id == 3:
+                pl_bt.level_id = 2
         pl_bt.go_left()
 
 
 # вправо
 def move_right(pl_bt):
-    if (pl_bt.level == 1 or pl_bt.level == 3) and pl_bt.rect.x <= st.width - 60:
+    if (pl_bt.level_id == 1 or pl_bt.level_id == 3) and pl_bt.rect.x <= st.width - 60:
         pl_bt.go_right()
-    elif pl_bt.level == 0 or pl_bt.level == 2:
+    elif pl_bt.level_id == 0 or pl_bt.level_id == 2:
         if pl_bt.rect.x >= st.width - 30:
             pl_bt.rect.x = -10
-            if pl_bt.level == 0:
-                pl_bt.level = 1
-            elif pl_bt.level == 2:
-                pl_bt.level = 3
+            if pl_bt.level_id == 0:
+                pl_bt.level_id = 1
+            elif pl_bt.level_id == 2:
+                pl_bt.level_id = 3
         pl_bt.go_right()
 
 

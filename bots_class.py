@@ -18,10 +18,16 @@ class Bot(pygame.sprite.Sprite, support_pl_bt.Support):
         self.rect = self.image.get_rect()
 
         #  уровень на котором находится бот
-        self.level = random.randint(0, 3)
+        self.level_id = random.randint(0, 3)
         # вектор перемещения (для отслеживания столкновений) на будующее
         self.change_x = 0
         self.change_y = 0
         # скорость перемешения
         self.speed = speed_bot
 
+    def get_move(self):
+        return random.choice([0, 2]), random.choice([1, 3])
+
+    def update(self):
+        self.rect.x += self.change_x
+        self.rect.y += self.change_y

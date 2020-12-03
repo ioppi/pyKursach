@@ -17,7 +17,7 @@ class Player(pygame.sprite.Sprite, Support):
         # Установите ссылку на изображение прямоугольника
         self.rect = self.image.get_rect()
         #  уровень на котором находится игрок
-        self.level = random.randint(0, 3)
+        self.level_id = random.randint(0, 3)
         # вектор перемещения (для отслеживания столкновений) на будующее
         self.change_x = 0
         self.change_y = 0
