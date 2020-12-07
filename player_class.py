@@ -23,9 +23,15 @@ class Player(pygame.sprite.Sprite, Support):
         self.change_y = 0
         # скорость перемешения
         self.speed = speed_player
+        self.score = 0
 
-    def update(self):
+    def update(self, active_bt):
         # Передвигаем его
         # change_x/y будет меняться при нажатии на стрелочки клавиатуры
         self.rect.x += self.change_x
         self.rect.y += self.change_y
+
+        for bot in active_bt:
+            if pygame.sprite.collide_rect(self, bot) and bot.bot_live:
+                bot.bot_live = False
+                self.score += 1

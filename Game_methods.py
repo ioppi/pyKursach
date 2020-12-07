@@ -55,13 +55,14 @@ def run_game():
     remaining_time = st.time
     # остновной цикл
     run = True
-
+    game = True
+    win = False
     while run:
         n_tick += 1
         if n_tick % 30 == 0:
             print(remaining_time - game_time-1)
             game_time += 1
-        if remaining_time-game_time > 0:
+        if game:
             # кадры в секунду
             clock.tick(st.frames_per_second)
             for event in pygame.event.get():
@@ -77,7 +78,22 @@ def run_game():
                 move_bot(i, levels_map.block_map)
             # отрисовка всего и вся
             draw(screen, bg, pl_sprite_list, bt_sprite_list, player.level_id, levels_map)
+
+            if remaining_time - game_time <= 0:
+                game = False
+            if player.score == 5:
+                game = False
+                win = True
         else:
+            f = pygame.font.Font(None, 200)
+            button = pygame.Rect(st.width/2-325, st.height/2-100, 650, 200)
+            if win:
+                text = f.render("You Win", True, (0, 180, 0))
+            else:
+                text = f.render("You Lose", True, (180, 0, 0))
+            pygame.draw.rect(screen, [0, 0, 180], button)
+            screen.blit(text, (st.width/2-305, st.height/2-60))
+            pygame.display.update()
             game_time = 0
             remaining_time = 0
             for event in pygame.event.get():
@@ -100,7 +116,7 @@ def draw(screen, bg, pl, bt, level, block_map):
     block_map.update()
     block_map.draw(level, screen)
     # обновление позиции персонажа
-    pl.update()
+    pl.update(active_bt)
     pl.draw(screen)
     # обновление экрана
     pygame.display.update()
@@ -133,18 +149,18 @@ def move_player(player, level_maps):
 # метод движение ботов
 def move_bot(bot, level_maps):  # 0-up/1-right/2-down/3-left/
     bot.stop()
-    bot.lvl = level_maps[bot.level_id]
-    mv = bot.get_move()
+    if bot.bot_live:
+        bot.lvl = level_maps[bot.level_id]
+        mv = bot.get_move()
+        if mv[0] == 0:
+            move_up(bot)
+        if mv[0] == 2:
+            move_down(bot)
 
-    if mv[0] == 0:
-        move_up(bot)
-    if mv[0] == 2:
-        move_down(bot)
-
-    if mv[1] == 1:
-        move_right(bot)
-    if mv[1] == 3:
-        move_left(bot)
+        if mv[1] == 1:
+            move_right(bot)
+        if mv[1] == 3:
+            move_left(bot)
 
 
 # вспомогательные методы для двмжения бота и игрока

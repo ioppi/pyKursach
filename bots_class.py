@@ -24,6 +24,7 @@ class Bot(pygame.sprite.Sprite, support_pl_bt.Support):
         self.change_y = 0
         # скорость перемешения
         self.speed = speed_bot
+        self.bot_live = True
 
     def get_move(self):
         return random.choice([0, 2]), random.choice([1, 3])
