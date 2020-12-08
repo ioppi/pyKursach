@@ -14,7 +14,7 @@ class Setting:
         self.sound_volume = 0.1
         self.block_size = 120
         self.block_value = 45
-        self.time = 1
+        self.time = 90
 
         try:
             f = open("setting.txt", "r")

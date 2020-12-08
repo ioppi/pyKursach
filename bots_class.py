@@ -1,6 +1,7 @@
 import pygame
 import support_pl_bt
 import random
+import math
 
 
 class Bot(pygame.sprite.Sprite, support_pl_bt.Support):
@@ -26,9 +27,33 @@ class Bot(pygame.sprite.Sprite, support_pl_bt.Support):
         self.speed = speed_bot
         self.bot_live = True
 
-    def get_move(self):
-        return random.choice([0, 2]), random.choice([1, 3])
+    def get_move(self, pl, t):
+        key = [random.choice([0, 2]), random.choice([1, 3])]
+        if pl.level_id == self.level_id:
+            if math.sqrt((pl.rect.x - self.rect.x) ** 2 + (pl.rect.y - self.rect.y) ** 2) < 600:
+                if pl.rect.x < self.rect.x:
+                    key[1] = 1
+                else:
+                    key[1] = 3
+                if pl.rect.y > self.rect.y:
+                    key[0] = 0
+                else:
+                    key[0] = 2
+                print(key)
+            else:
+                if self.timer(t):
+                    key = [random.choice([0, 2]), random.choice([1, 3])]
+                    print(key)
+        if self.timer(t):
+            key = [random.choice([0, 2]), random.choice([1, 3])]
+            print(key)
+        return key
 
     def update(self):
         self.rect.x += self.change_x
         self.rect.y += self.change_y
+
+    def timer(self, t):
+        if t % 5 == 0:
+            return True
+        return False

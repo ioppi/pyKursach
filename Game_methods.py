@@ -23,7 +23,7 @@ def run_game():
     levels_map = Levels()
     bots = []
     for i in range(5):
-        b = bots_class.Bot(st.speed-1)
+        b = bots_class.Bot(st.speed+1)
         spawn(b)
         bots.append(b)
     print(bots)
@@ -60,9 +60,13 @@ def run_game():
     while run:
         n_tick += 1
         if n_tick % 30 == 0:
-            print(remaining_time - game_time-1)
             game_time += 1
         if game:
+            if remaining_time - game_time <= 0:
+                game = False
+            if player.score == 5:
+                game = False
+                win = True
             # кадры в секунду
             clock.tick(st.frames_per_second)
             for event in pygame.event.get():
@@ -75,15 +79,10 @@ def run_game():
             # метод движения игрока
             move_player(player, levels_map.block_map)
             for i in bots:
-                move_bot(i, levels_map.block_map)
+                move_bot(i, levels_map.block_map, player, game_time)
             # отрисовка всего и вся
-            draw(screen, bg, pl_sprite_list, bt_sprite_list, player.level_id, levels_map)
-
-            if remaining_time - game_time <= 0:
-                game = False
-            if player.score == 5:
-                game = False
-                win = True
+            draw(screen, bg, pl_sprite_list, bt_sprite_list, player.level_id, levels_map, (remaining_time - game_time),
+                 player.score)
         else:
             f = pygame.font.Font(None, 200)
             button = pygame.Rect(st.width/2-325, st.height/2-100, 650, 200)
@@ -91,11 +90,13 @@ def run_game():
                 text = f.render("You Win", True, (0, 180, 0))
             else:
                 text = f.render("You Lose", True, (180, 0, 0))
+
             pygame.draw.rect(screen, [0, 0, 180], button)
             screen.blit(text, (st.width/2-305, st.height/2-60))
             pygame.display.update()
             game_time = 0
             remaining_time = 0
+
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
@@ -103,7 +104,7 @@ def run_game():
 
 
 # метод отрисовки всего (есои чтото нужно орисовать кидаем это сюда)
-def draw(screen, bg, pl, bt, level, block_map):
+def draw(screen, bg, pl, bt, level, block_map, game_time, score):
     # отрисовка заднего фона
     screen.blit(bg[level], (0, 0))
     active_bt = pygame.sprite.Group()
@@ -118,6 +119,15 @@ def draw(screen, bg, pl, bt, level, block_map):
     # обновление позиции персонажа
     pl.update(active_bt)
     pl.draw(screen)
+
+    f = pygame.font.Font(None, 30)
+    button = pygame.Rect(st.width / 2 - 20, 0, 40, 20)
+    text = f.render(f"{game_time}", True, (0, 180, 0))
+    pygame.draw.rect(screen, [0, 0, 180], button)
+    screen.blit(text, (st.width / 2 - 10, 2))
+    f = pygame.font.Font(None, 40)
+    text = f.render(f"{score}/5", True, (200, 0, 0))
+    screen.blit(text, (st.width/2 + 35, 2))
     # обновление экрана
     pygame.display.update()
 
@@ -125,8 +135,8 @@ def draw(screen, bg, pl, bt, level, block_map):
 # метод движение персонажа
 def move_player(player, level_maps):
     # останавливаем движение, если кнопки движения нажаты продолжает двигаться
-    player.lvl = level_maps[player.level_id]
     player.stop()
+    player.lvl = level_maps[player.level_id]
     # нажатые кнопки
     keys = pygame.key.get_pressed()
     # движение
@@ -147,16 +157,15 @@ def move_player(player, level_maps):
 
 
 # метод движение ботов
-def move_bot(bot, level_maps):  # 0-up/1-right/2-down/3-left/
+def move_bot(bot, level_maps, pl, t):  # 0-up/1-right/2-down/3-left/
+    bot.lvl = level_maps[bot.level_id]
     bot.stop()
     if bot.bot_live:
-        bot.lvl = level_maps[bot.level_id]
-        mv = bot.get_move()
+        mv = bot.get_move(pl, t)
         if mv[0] == 0:
             move_up(bot)
         if mv[0] == 2:
             move_down(bot)
-
         if mv[1] == 1:
             move_right(bot)
         if mv[1] == 3:
