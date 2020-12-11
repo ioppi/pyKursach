@@ -11,18 +11,27 @@ class Setting:
         self.height = self.infoObject.current_h
         self.size_screen = [self.width, self.height]
         self.frames_per_second = 30
-        self.sound_volume = 0.1
+        self.sound_volume = 0.01
         self.block_size = 120
         self.block_value = 45
-        self.time = 90
+        self.time = 60
 
         try:
             f = open("setting.txt", "r")
+            s = f.readline(100)
+            self.speed = int(s[s.find(" = ")+3:len(s)])
+            s = f.readline(100)
+            self.sound_volume = int( s[s.find(" = ") + 3:len(s)])
+            s = f.readline(100)
+            self.time = int(s[s.find(" = ") + 3:len(s)])
+            s = f.readline(100)
+            self.block_size = int(s[s.find(" = ") + 3:len(s)])
+            s = f.readline(100)
+            self.block_value = int(s[s.find(" = ") + 3:len(s)])
             f.close()
-        except FileNotFoundError:
+        except:
             f = open("setting.txt", "w")
             f.write(f"speed = {self.speed} \n" 
-                    f"frames_per_second = {self.frames_per_second} \n"
                     f"sound_volume = {self.sound_volume} \n"
                     f"time = {self.time} \n"
                     f"block_size = {self.block_size} \n"

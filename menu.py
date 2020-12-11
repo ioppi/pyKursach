@@ -29,9 +29,7 @@ def main_menu():
         draw_text('Главное меню', font, (123, 104, 238), screen, 30, 30)
         # музыка
         pygame.mixer.music.load('../pyKursach/music/The Weeknd - Blinding Lights.mp3')
-        # саунды для клика мышки но они пока не работают
-        sound1 = pygame.mixer.Sound('../pyKursach/music/4669_top-rington.ru_.mp3')
-        sound2 = pygame.mixer.Sound('../pyKursach/music/4876_pod-zvonok.ru__.mp3')
+        pygame.mixer.music.set_volume(st.sound_volume)
         # координаты мышки и расположение кнопок
         mx, my = pygame.mouse.get_pos()
         button_1 = pygame.Rect(100, 200, 300, 100)
@@ -62,26 +60,3 @@ def main_menu():
 
         pygame.display.update()
         mainClock.tick(60)
-
-        # код для музыки но пока не работает
-        for i in pygame.event.get():
-            if i.type == pygame.QUIT:
-                exit()
-            elif i.type == pygame.KEYUP:
-                if i.key == pygame.K_1:
-                    pygame.mixer.music.pause()
-                    # pygame.mixer.music.stop()
-                elif i.key == pygame.K_2:
-                    pygame.mixer.music.unpause()
-                    sound1.set_volume(st.sound_volume)
-                    sound2.set_volume(st.sound_volume)
-                elif i.key == pygame.K_3:
-                    pygame.mixer.music.unpause()
-                    # pygame.mixer.music.play()
-                    pygame.mixer.music.set_volume(1)
-            elif i.type == pygame.MOUSEBUTTONUP:
-                if i.button == 1:
-                    sound1.set_volume(st.sound_volume)
-                    sound1.play()
-                elif i.button == 3:
-                    sound2.play()

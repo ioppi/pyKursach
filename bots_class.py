@@ -39,14 +39,11 @@ class Bot(pygame.sprite.Sprite, support_pl_bt.Support):
                     key[0] = 0
                 else:
                     key[0] = 2
-                print(key)
             else:
                 if self.timer(t):
                     key = [random.choice([0, 2]), random.choice([1, 3])]
-                    print(key)
         if self.timer(t):
             key = [random.choice([0, 2]), random.choice([1, 3])]
-            print(key)
         return key
 
     def update(self):
