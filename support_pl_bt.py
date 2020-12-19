@@ -43,6 +43,8 @@ class Support:
                 moving[0] = False
             if block.rect.bottom-a < self.rect.top <= block.rect.bottom:
                 moving[1] = False
+                """if :
+                    self.rect.top = block.rect.bottom + 1"""
             if block.rect.left+a > self.rect.right >= block.rect.left:
                 moving[2] = False
             if block.rect.top+a > self.rect.bottom >= block.rect.top:

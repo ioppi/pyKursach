@@ -14,20 +14,23 @@ class Setting:
         self.sound_volume = 0.01
         self.block_size = 120
         self.block_value = 45
-        self.time = 60
+        self.time = 90
+        self.two_players = True
 
         try:
             f = open("setting.txt", "r")
             s = f.readline(100)
-            self.speed = int(s[s.find(" = ")+3:len(s)])
+            self.speed = int(s[s.find(" = ") + 3:len(s)])
             s = f.readline(100)
-            self.sound_volume = int( s[s.find(" = ") + 3:len(s)])
+            self.sound_volume = float(s[s.find(" = ") + 3:len(s)])
             s = f.readline(100)
             self.time = int(s[s.find(" = ") + 3:len(s)])
             s = f.readline(100)
             self.block_size = int(s[s.find(" = ") + 3:len(s)])
             s = f.readline(100)
             self.block_value = int(s[s.find(" = ") + 3:len(s)])
+            s = f.readline(100)
+            self.two_players = bool(s[s.find(" = ") + 3:len(s)])
             f.close()
         except:
             f = open("setting.txt", "w")
@@ -35,5 +38,6 @@ class Setting:
                     f"sound_volume = {self.sound_volume} \n"
                     f"time = {self.time} \n"
                     f"block_size = {self.block_size} \n"
-                    f"block_value = {self.block_value} \n")
+                    f"block_value = {self.block_value} \n"
+                    f"two_players = {self.two_players} \n")
             f.close()

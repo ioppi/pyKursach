@@ -13,8 +13,7 @@ class Bot(pygame.sprite.Sprite, support_pl_bt.Support):
         super().__init__()
 
         # картинка, бота
-        self.image = pygame.Surface((50, 50))
-        self.image.fill((255, 0, 0))
+        self.image = pygame.transform.scale(pygame.image.load("img/mouse.png"), (50, 50))
         # Установите ссылку на изображение прямоугольника
         self.rect = self.image.get_rect()
 
@@ -49,8 +48,13 @@ class Bot(pygame.sprite.Sprite, support_pl_bt.Support):
     def update(self):
         self.rect.x += self.change_x
         self.rect.y += self.change_y
+        if not self.bot_live:
+            self.dead()
 
     def timer(self, t):
         if t % 5 == 0:
             return True
         return False
+
+    def dead(self):
+        self.image = pygame.transform.scale(pygame.image.load("img/dead.png"), (40, 40))

@@ -1,11 +1,12 @@
+from level_manage import Levels
+from pygame.locals import *
 import pygame
 import random
 import player_class
+import math
 import bots_class
-from level_manage import Levels
 import setting_class
 import sys
-from pygame.locals import *
 
 # инициализация
 pygame.init()
@@ -26,7 +27,6 @@ def run_game():
         b = bots_class.Bot(st.speed+1)
         spawn(b)
         bots.append(b)
-    print(bots)
     # инициализация и размер экрана
     screen = pygame.display.set_mode(st.size_screen)
     # название окна (игры)
@@ -80,6 +80,10 @@ def run_game():
             move_player(player, levels_map.block_map)
             for i in bots:
                 move_bot(i, levels_map.block_map, player, game_time)
+            move_mouse(player)
+            p_rect = player.rect
+            if p_rect.collidepoint(pygame.mouse.get_pos()):
+                game = False
             # отрисовка всего и вся
             draw(screen, bg, pl_sprite_list, bt_sprite_list, player.level_id, levels_map, (remaining_time - game_time),
                  player.score)
@@ -108,10 +112,12 @@ def draw(screen, bg, pl, bt, level, block_map, game_time, score):
     # отрисовка заднего фона
     screen.blit(bg[level], (0, 0))
     active_bt = pygame.sprite.Group()
-    for i in bt:
-        i.update()
-        if i.level_id == level:
-            active_bt.add(i)
+
+    for p in pl:
+        for i in bt:
+            i.update()
+            if i.level_id == level and math.sqrt((p.rect.x - i.rect.x) ** 2 + (p.rect.y - i.rect.y) ** 2) < 300:
+                active_bt.add(i)
     active_bt.draw(screen)
 
     block_map.update()
@@ -159,18 +165,31 @@ def move_player(player, level_maps):
 # метод движение ботов
 def move_bot(bot, level_maps, pl, t):  # 0-up/1-right/2-down/3-left/
     bot.lvl = level_maps[bot.level_id]
-    bot.stop()
-    if bot.bot_live:
-        mv = bot.get_move(pl, t)
-        if mv[0] == 0:
-            move_up(bot)
-        if mv[0] == 2:
-            move_down(bot)
-        if mv[1] == 1:
-            move_right(bot)
-        if mv[1] == 3:
-            move_left(bot)
+    if not st.two_players:
+        bot.stop()
+        if bot.bot_live:
+            mv = bot.get_move(pl, t)
+            if mv[0] == 0:
+                move_up(bot)
+            if mv[0] == 2:
+                move_down(bot)
+            if mv[1] == 1:
+                move_right(bot)
+            if mv[1] == 3:
+                move_left(bot)
+    else:
 
+        keys = pygame.key.get_pressed()
+        bot.stop()
+        if bot.bot_live:
+            if keys[K_w]:
+                move_up(bot)
+            if keys[K_s]:
+                move_down(bot)
+            if keys[K_d]:
+                move_right(bot)
+            if keys[K_a]:
+                move_left(bot)
 
 # вспомогательные методы для двмжения бота и игрока
 # вверх
@@ -242,6 +261,24 @@ def spawn(pl_bt):
             x = random.randint(0, (st.block_size - 51))
         else:
             x = random.randint((st.width - st.block_size), st.width - 51)
-
     pl_bt.rect.x = x
     pl_bt.rect.y = y
+
+
+def move_mouse(pl):
+    pos_mouse = pygame.mouse.get_pos()
+    pos_pl = pl.rect.center
+    if pos_mouse[0] > pos_pl[0]:
+        x = -3
+    elif pos_mouse[0] == pos_pl[0]:
+        x = 0
+    else:
+        x = 3
+    if pos_mouse[1] > pos_pl[1]:
+        y = -3
+    elif pos_mouse[1] == pos_pl[1]:
+        y = 0
+    else:
+        y = 3
+    pm = [pos_mouse[0]+x, pos_mouse[1]+y]
+    pygame.mouse.set_pos(pm)
