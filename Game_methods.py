@@ -165,20 +165,7 @@ def move_player(player, level_maps):
 # метод движение ботов
 def move_bot(bot, level_maps, pl, t):  # 0-up/1-right/2-down/3-left/
     bot.lvl = level_maps[bot.level_id]
-    if not st.two_players:
-        bot.stop()
-        if bot.bot_live:
-            mv = bot.get_move(pl, t)
-            if mv[0] == 0:
-                move_up(bot)
-            if mv[0] == 2:
-                move_down(bot)
-            if mv[1] == 1:
-                move_right(bot)
-            if mv[1] == 3:
-                move_left(bot)
-    else:
-
+    if st.two_players:
         keys = pygame.key.get_pressed()
         bot.stop()
         if bot.bot_live:
@@ -190,6 +177,19 @@ def move_bot(bot, level_maps, pl, t):  # 0-up/1-right/2-down/3-left/
                 move_right(bot)
             if keys[K_a]:
                 move_left(bot)
+    else:
+        bot.stop()
+        if bot.bot_live:
+            mv = bot.get_move(pl, t)
+            if mv[0] == 0:
+                move_up(bot)
+            if mv[0] == 2:
+                move_down(bot)
+            if mv[1] == 1:
+                move_right(bot)
+            if mv[1] == 3:
+                move_left(bot)
+
 
 # вспомогательные методы для двмжения бота и игрока
 # вверх

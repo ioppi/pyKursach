@@ -15,7 +15,7 @@ class Setting:
         self.block_size = 120
         self.block_value = 45
         self.time = 90
-        self.two_players = True
+        self.two_players = False
 
         try:
             f = open("setting.txt", "r")
